@@ -10,8 +10,12 @@ class MergeExcel:
         self.ext = ext
         # 获取当前目录下的所有xslx 文件,返回是个generate
         files = self.path.glob(f'*.{self.ext}')
-        for file in files:
-            print(file)
+        return files
+        # for file in files:
+        #     print(file)
+
+    def get_content(self, files):
+        pass
 
 
 if __name__ == '__main__':
