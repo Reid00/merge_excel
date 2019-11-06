@@ -43,4 +43,4 @@ if __name__ == '__main__':
     output_name = Path(r'C:\Users\v-baoz\Downloads\1029_poems\res.csv')
     if output_name.exists():
         output_name.unlink()
-    all_content.to_csv(output_name, index=None, header=True, mode='w')
+    all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8-sig')
