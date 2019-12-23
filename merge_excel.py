@@ -21,7 +21,7 @@ class MergeExcel:
             if len(sheet_names) > 1:
                 print(f'this excel contains many sheets')
                 for k, sheet_name in enumerate(sheet_names):
-                    print(f'{k}-{sheet_name}')
+                    print(f'No.{k} sheet name- {sheet_name}')
                 sheet_name_input = input('please input the sheetname you want to merge:')
                 content = pd.read_excel(file, sheet_name=sheet_name_input, encoding='utf8')
                 print(f'file line number {content.shape[0]}')
@@ -37,10 +37,10 @@ class MergeExcel:
 
 
 if __name__ == '__main__':
-    me = MergeExcel(r'C:\Users\v-baoz\Downloads\1029_poems')
+    me = MergeExcel(r'D:\download_D\1219_音乐名称判断\1223\五字')
     all_content = me.get_files()
     print(f'all content of merged shape is {all_content.shape}')
-    output_name = Path(r'C:\Users\v-baoz\Downloads\1029_poems\res.csv')
+    output_name = Path(r'D:\download_D\1219_音乐名称判断\1223\五字\res.csv')
     if output_name.exists():
         output_name.unlink()
     all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8-sig')
