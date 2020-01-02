@@ -8,17 +8,18 @@ class MergeExcel:
     """
     使用前请确保excel 有相同的列名称，否则会有数据上的错误
     """
-    def __init__(self, path,sum=0):
+    def __init__(self, path,sum=0,exts=['xlsx','xls']):
         self.path = Path(path)
         self.sum=sum
-
-    def files_path(self,exts=['xlsx','xls']):
-        files=list()
         self.exts=exts
-        for ext in exts:
+
+    def files_path(self):
+        files=list()
+        for ext in self.exts:
                     # 获取当前目录下的所有xslx 文件,返回是个generate
             files.append(self.path.glob(f'*.{ext}'))
         files=list(chain(*files))
+        files=[file for file in files if file.stem!='res']
         return files
 
     def get_content(self):
