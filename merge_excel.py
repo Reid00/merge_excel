@@ -14,12 +14,13 @@ class MergeExcel:
         self.exts=exts
 
     def files_path(self):
-        files=list()
+        files = list()
+
         for ext in self.exts:
-                    # 获取当前目录下的所有xslx 文件,返回是个generate
+            # 获取当前目录下的所有xslx 文件,返回是个generate
             files.append(self.path.glob(f'*.{ext}'))
-        files=list(chain(*files))
-        files=[file for file in files if file.stem!='res']
+        files = list(chain(*files))
+        files = [file for file in files if file.stem != 'res']
         return files
 
     def get_content(self):
@@ -47,6 +48,9 @@ class MergeExcel:
                 # 输入多个你想要合并的sheet name
                 sheet_name_inputs = input('\033[1;36m please input the sheetnames you want to merge,split with ",":\033[0m').split(',')
                 for sheet_name in sheet_name_inputs:
+                    if sheet_name == '':
+                        logging.info(f'nothing selected')
+                        continue
                     content = pd.read_excel(file, sheet_name=sheet_name.strip(), encoding='utf-8-sig',usecols=usecols)
                     logging.info(f'Sheet {sheet_name} own line number before: {content.shape[0]}')
                     content=content.dropna(how='all')
@@ -65,14 +69,62 @@ class MergeExcel:
         logging.info(f'\033[1;36m All the sum of content is: {self.sum} \033[0m')
         return all_cont
 
+    def value_counts_info(self):
+        dataframe = pd.DataFrame({
+            'name': ['Reid', 'Reid', 'Knight', 'Tom'],
+            'times': [1, 2, 2, 3]
+        })
+        # 统计name出现次数
+        counts=dataframe['name'].value_counts()
+        print(counts)
+        # 统计name出现两次以上的
+        cnt_gt2= counts[counts>1]
+        print(cnt_gt2)
+        # 统计name 包含i 的有哪些
+        name_contains_i= dataframe['name'].str.contains('i')
+        print(name_contains_i)
+
+    def sort_according_lst(self):
+        order_lst=['b','a','c']
+        data=pd.DataFrame({
+            'words':list('abc'),
+            'number':list('123')
+        })
+        print(data)
+        #相等的情况下，可以使用 reorder_categories和 set_categories方法；
+        # inplace = True，使 set_categories生效
+        data['words']=data['words'].astype('category')
+        data['words'].cat.set_categories(order_lst,inplace=True)
+        data.sort_values('words',inplace=True)
+        print(f'list 数目相同: \n {data}')
+        print('========='*10)
+        # list的元素比较多的情况下， 可以使用set_categories方法；
+        # list的元素比较少的情况下， 也可以使用set_categories方法，但list中没有的元素会在DataFrame中以NaN表示。
+        order_lst=['b','c']
+        data['words'].cat.set_categories(order_lst,inplace=True)
+        data.sort_values(by=['words'],inplace=True)
+        print(f'list 数目比较少: \n{data}')
+        print('========='*10)
+
+        data=pd.DataFrame({
+            'words':list('abc'),
+            'number':list('123')
+        })
+        order_lst=['b','c','a','d']
+        data['words']=data['words'].astype('category')
+        data['words'].cat.set_categories(order_lst,inplace=True)
+        data.sort_values(by=['words'],inplace=True)
+        print(f'list 数目比较多: \n{data}')
+        print('========='*20)
 
 if __name__ == '__main__':
-    me = MergeExcel(r'D:\download_D\1230_小万歌曲标注\test')
+    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0108')
     all_content = me.get_content()
     logging.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
-    # output_name = Path(r'D:\download_D\1230_小万歌曲标注\test\res.csv')
-    output_name = Path(r'D:\download_D\1230_小万歌曲标注\test\res.xlsx')
+    output_name = Path(r'D:\download_D\1230_小万内容清洗\0108\res.xlsx')
     if output_name.exists():
         output_name.unlink()
     # all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8')
     all_content.to_excel(output_name, index=None, header=True, encoding='utf-8')
+    print(r'jobs done')
+    # me.sort_according_lst()
