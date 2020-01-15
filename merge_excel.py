@@ -2,7 +2,11 @@ import pandas as pd
 from pathlib import Path
 import logging
 from itertools import chain
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+import re
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO,filemode='w',
+# filename='log.log'
+)
+logger=logging.getLogger(__name__)
 
 class MergeExcel:
     """
@@ -14,8 +18,10 @@ class MergeExcel:
         self.exts=exts
 
     def files_path(self):
+        """
+        获取需要处理的文件路径，去除到处的结果res
+        """
         files = list()
-
         for ext in self.exts:
             # 获取当前目录下的所有xslx 文件,返回是个generate
             files.append(self.path.glob(f'*.{ext}'))
@@ -24,13 +30,16 @@ class MergeExcel:
         return files
 
     def get_content(self):
+        """
+        获取每个excel 里面的内容
+        """
         files=self.files_path()
         all_cont = pd.DataFrame()
         usecols= int(input('\033[1;36m please input the Column Number you want to use for this action:\033[0m').strip())
         usecols=range(usecols)
         for file in files:
             print('======='*10)
-            logging.info(f'file name: {file}')
+            logger.info(f'file name: {file}')
             # 读取每个excel 的各个sheetDefaults ： 第一页作为数据文件
             # 1 ：第二页作为数据文件
             # “Sheet1” ：第一页作为数据文件
@@ -42,34 +51,37 @@ class MergeExcel:
             #决定使用前几列
 
             if len(sheet_names) > 1:
-                logging.info(f'this excel contains many sheets')
+                logger.info(f'this excel contains many sheets')
                 for k, sheet_name in enumerate(sheet_names):
                     print(f'\033[1;33m No.{k} sheet name- {sheet_name} \033[0m')
                 # 输入多个你想要合并的sheet name
                 sheet_name_inputs = input('\033[1;36m please input the sheetnames you want to merge,split with ",":\033[0m').split(',')
                 for sheet_name in sheet_name_inputs:
                     if sheet_name == '':
-                        logging.info(f'nothing selected')
+                        logger.info(f'nothing selected')
                         continue
                     content = pd.read_excel(file, sheet_name=sheet_name.strip(), encoding='utf-8-sig',usecols=usecols)
-                    logging.info(f'Sheet {sheet_name} own line number before: {content.shape[0]}')
+                    logger.info(f'Sheet {sheet_name} own line number before: {content.shape[0]}')
                     content=content.dropna(how='all')
-                    logging.info(f'Sheet {sheet_name} own columns: {content.columns}')
-                    logging.info(f'Sheet {sheet_name} own line number after dropna: {content.shape[0]}')
+                    logger.info(f'Sheet {sheet_name} own columns: {content.columns}')
+                    logger.info(f'Sheet {sheet_name} own line number after dropna: {content.shape[0]}')
                     self.sum += content.shape[0]
                     all_cont = pd.concat([all_cont, content], axis=0, sort=False)
             else:
                 content = pd.read_excel(file, encoding='utf-8-sig',usecols=usecols)
-                logging.info(f'this file own line number before: {content.shape[0]}')
+                logger.info(f'this file own line number before: {content.shape[0]}')
                 content=content.dropna(how='all')
-                logging.info(f'this file own columns: {content.columns}')
-                logging.info(f'this file own line number after dropna: {content.shape[0]}')
+                logger.info(f'this file own columns: {content.columns}')
+                logger.info(f'this file own line number after dropna: {content.shape[0]}')
                 self.sum += content.shape[0]
                 all_cont = pd.concat([all_cont, content], axis=0, sort=False)
-        logging.info(f'\033[1;36m All the sum of content is: {self.sum} \033[0m')
+        logger.info(f'\033[1;36m All the sum of content is: {self.sum} \033[0m')
         return all_cont
 
     def value_counts_info(self):
+        """
+        value_counts 的一些方法使用，可以用pivot 代替
+        """
         dataframe = pd.DataFrame({
             'name': ['Reid', 'Reid', 'Knight', 'Tom'],
             'times': [1, 2, 2, 3]
@@ -85,6 +97,10 @@ class MergeExcel:
         print(name_contains_i)
 
     def sort_according_lst(self):
+        """
+        根据一个list 顺序对dataframe 的某一列进行排序
+        
+        """
         order_lst=['b','a','c']
         data=pd.DataFrame({
             'words':list('abc'),
@@ -117,14 +133,22 @@ class MergeExcel:
         print(f'list 数目比较多: \n{data}')
         print('========='*20)
 
+    def rm_blank(self,dataframe,*columns):
+        """
+        去除指定列中的空格
+        """
+        for col in columns:
+            dataframe[col]=dataframe[col].apply(lambda x:re.sub(r'\s','',str(x)))
+        return dataframe
+
 if __name__ == '__main__':
-    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0108')
+    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0113')
     all_content = me.get_content()
-    logging.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
-    output_name = Path(r'D:\download_D\1230_小万内容清洗\0108\res.xlsx')
+    all_content=rm_blank(all_content)
+    logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
+    output_name = Path(r'D:\download_D\1230_小万内容清洗\0113\res.xlsx')
     if output_name.exists():
         output_name.unlink()
     # all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8')
     all_content.to_excel(output_name, index=None, header=True, encoding='utf-8')
     print(r'jobs done')
-    # me.sort_according_lst()
