@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from pathlib import Path
 import logging
@@ -138,15 +139,20 @@ class MergeExcel:
         去除指定列中的空格
         """
         for col in columns:
-            dataframe[col]=dataframe[col].apply(lambda x:re.sub(r'\s','',str(x)))
+            # breakpoint()
+            dataframe[col]=dataframe[col].astype(str).apply(lambda x: re.sub(r'\s+','',x))
+            # dataframe[col]=dataframe[col].apply(lambda x: re.sub(r'\s+','',str(x)))
+            # dataframe[col]=dataframe[col].astype(str).str.replace(r'\s','',regex=True)
+            dataframe.replace('nan','',inplace=True)
         return dataframe
 
 if __name__ == '__main__':
-    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0113')
+    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0109')
     all_content = me.get_content()
-    all_content=rm_blank(all_content)
+    columns=['专辑名称','歌曲名称','上下']
+    all_content=me.rm_blank(all_content,*columns)
     logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
-    output_name = Path(r'D:\download_D\1230_小万内容清洗\0113\res.xlsx')
+    output_name = Path(r'D:\download_D\1230_小万内容清洗\0109\res.xlsx')
     if output_name.exists():
         output_name.unlink()
     # all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8')
