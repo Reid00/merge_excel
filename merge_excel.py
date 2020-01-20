@@ -136,7 +136,7 @@ class MergeExcel:
 
     def rm_blank(self,dataframe,*columns):
         """
-        去除指定列中的空格
+        去除指定列中所有的空格
         """
         for col in columns:
             # breakpoint()
@@ -145,12 +145,23 @@ class MergeExcel:
             # dataframe[col]=dataframe[col].astype(str).str.replace(r'\s','',regex=True)
             dataframe.replace('nan','',inplace=True)
         return dataframe
+    def rm_strip(self,dataframe,*columns):
+        """
+        去除指定列中前后的空格
+        """
+        for col in columns:
+            dataframe[col]=dataframe[col].astype(str).apply(lambda x:x.strip())
+            dataframe.replace('nan','',inplace=True)
+        return dataframe
 
 if __name__ == '__main__':
     me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0109')
     all_content = me.get_content()
-    columns=['专辑名称','歌曲名称','上下']
-    all_content=me.rm_blank(all_content,*columns)
+    columns_rm_blank=['专辑名称','歌曲名称','上下']
+    columns_rm_strip=['专辑Tag','歌曲tag']
+    all_content=me.rm_blank(all_content,*columns_rm_blank)
+    all_content=me.rm_strip(all_content,*columns_rm_strip)
+    all_content.drop_duplicates(subset=['歌曲id'],keep='first',inplace=True)
     logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
     output_name = Path(r'D:\download_D\1230_小万内容清洗\0109\res.xlsx')
     if output_name.exists():
