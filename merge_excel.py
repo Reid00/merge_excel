@@ -155,15 +155,16 @@ class MergeExcel:
         return dataframe
 
 if __name__ == '__main__':
-    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0109')
+    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0120')
     all_content = me.get_content()
     columns_rm_blank=['专辑名称','歌曲名称','上下']
     columns_rm_strip=['专辑Tag','歌曲tag']
     all_content=me.rm_blank(all_content,*columns_rm_blank)
     all_content=me.rm_strip(all_content,*columns_rm_strip)
     all_content.drop_duplicates(subset=['歌曲id'],keep='first',inplace=True)
+    print(all_content.groupby('专辑名称.1')['歌曲id'].agg(np.size).nlargest(5))
     logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
-    output_name = Path(r'D:\download_D\1230_小万内容清洗\0109\res.xlsx')
+    output_name = Path(r'D:\download_D\1230_小万内容清洗\0120\res.xlsx')
     if output_name.exists():
         output_name.unlink()
     # all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8')
