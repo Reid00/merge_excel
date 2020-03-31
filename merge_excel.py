@@ -154,6 +154,17 @@ class MergeExcel:
             dataframe.replace('nan','',inplace=True)
         return dataframe
 
+    def check_characters(self, dataframe,*columns):
+        """
+        检查列中是否存在指定特殊字符
+        """
+        pattern=re.compile(r'[A-Za-z,.":]')
+        for col in columns:
+            res=dataframe.loc[dataframe[col].str.contains(pattern)]  # 返回一个dataframe 包含了字符和在原始里面的index
+            # print(f'这些行包含了需要检查的字符(下标从1开始){res.index + 1}')
+            for row in res.itertuples():
+                print(f'{getattr(row,"Index") +1} 行包含了需要检查的字符(下标从1开始); 内容前十个字符: {getattr(row,col)[:10]}')
+                # dataframe.loc[dataframe[col].str.contains(chars,regex=True)]
 if __name__ == '__main__':
     me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0120')
     all_content = me.get_content()
@@ -162,8 +173,9 @@ if __name__ == '__main__':
     all_content=me.rm_blank(all_content,*columns_rm_blank)
     all_content=me.rm_strip(all_content,*columns_rm_strip)
     all_content.drop_duplicates(subset=['歌曲id'],keep='first',inplace=True)
-    print(all_content.groupby('专辑名称.1')['歌曲id'].agg(np.size).nlargest(5))
+    print(all_content.groupby('专辑名称.1')['歌曲id'].agg(np.size).nlargest(5))     # 打印分组之后数量前五的数据
     logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
+    me.check_characters(all_content,'歌曲tag')
     output_name = Path(r'D:\download_D\1230_小万内容清洗\0120\res.xlsx')
     if output_name.exists():
         output_name.unlink()
