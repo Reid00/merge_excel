@@ -163,20 +163,21 @@ class MergeExcel:
             res=dataframe.loc[dataframe[col].str.contains(pattern)]  # 返回一个dataframe 包含了字符和在原始里面的index
             # print(f'这些行包含了需要检查的字符(下标从1开始){res.index + 1}')
             for row in res.itertuples():
-                print(f'{getattr(row,"Index") +1} 行包含了需要检查的字符(下标从1开始); 内容前十个字符: {getattr(row,col)[:10]}')
+                chars= re.findall(pattern,getattr(row,col))
+                print(f'{getattr(row,"Index") +1} 行包含了需要检查的字符(下标从1开始); 内容前十个字符: {getattr(row,col)[:10]}; 特殊字符是: {chars}')
                 # dataframe.loc[dataframe[col].str.contains(chars,regex=True)]
 if __name__ == '__main__':
-    me = MergeExcel(r'D:\download_D\1230_小万内容清洗\0120')
+    me = MergeExcel(r'D:\V-TinHua\Data\笑话语音转文本清洗')
     all_content = me.get_content()
-    columns_rm_blank=['专辑名称','歌曲名称','上下']
-    columns_rm_strip=['专辑Tag','歌曲tag']
+    columns_rm_blank=['修改后']
+    # columns_rm_strip=['专辑Tag','歌曲tag']
     all_content=me.rm_blank(all_content,*columns_rm_blank)
-    all_content=me.rm_strip(all_content,*columns_rm_strip)
-    all_content.drop_duplicates(subset=['歌曲id'],keep='first',inplace=True)
-    print(all_content.groupby('专辑名称.1')['歌曲id'].agg(np.size).nlargest(5))     # 打印分组之后数量前五的数据
+    # all_content=me.rm_strip(all_content,*columns_rm_strip)k
+    # all_content.drop_duplicates(subset=['歌曲id'],keep='first',inplace=True)
+    # print(all_content.groupby('专辑名称.1')['歌曲id'].agg(np.size).nlargest(5))     # 打印分组之后数量前五的数据
     logger.info(f'\033[1;36m All content of merged shape is {all_content.shape}\033[0m')
-    me.check_characters(all_content,'歌曲tag')
-    output_name = Path(r'D:\download_D\1230_小万内容清洗\0120\res.xlsx')
+    me.check_characters(all_content,'修改后')
+    output_name = Path(r'D:\V-TinHua\Data\笑话语音转文本清洗\res.xlsx')
     if output_name.exists():
         output_name.unlink()
     # all_content.to_csv(output_name, index=None, header=True, mode='w', encoding='utf-8')
